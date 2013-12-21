@@ -1,0 +1,261 @@
+diff -ur proxool-0.9.1/build.xml proxool-0.9.1.new/build.xml
+--- proxool-0.9.1/build.xml	2008-08-23 06:08:08.000000000 -0400
++++ proxool-0.9.1.new/build.xml	2011-08-26 09:01:12.895999398 -0400
+@@ -46,14 +46,14 @@
+ 
+     <!-- Classpath -->
+     <path id="source" path="${build-dir}/classes">
+-        <fileset dir="lib">
++        <fileset dir="/usr/share/java">
+             <include name="**/*.jar"/>
+     	    <include name="**/*.zip"/>
+         </fileset>
+         <path path="build/lib/proxool-cglib.jar"/>
+     </path>
+     <path id="binary">
+-        <fileset dir="lib">
++        <fileset dir="/usr/share/java">
+             <include name="**/*.jar"/>
+ 	    <include name="**/*.zip"/>
+         </fileset>
+@@ -197,7 +197,7 @@
+         description="Compiles the code"
+         depends="init,build-src,repackage-dependencies"
+         >
+-        <javac srcdir="${build-dir}/src/java" target="1.2" source="1.2" destdir="${build-dir}/classes" debug="${debug}">
++        <javac srcdir="${build-dir}/src/java" target="1.6" source="1.6" destdir="${build-dir}/classes" debug="${debug}">
+             <classpath refid="source"/>
+             <classpath path="build/proxool-cglib.jar"/>
+         </javac>
+@@ -217,18 +217,11 @@
+             <attribute name="Proxool-Version" value="${release}"/>
+             <attribute name="Date" value="${TODAY}"/>
+         </manifest>
+-        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="jarjar/jarjar-0.6.jar"/>
+-        <jarjar
+-                verbose="true"
++        <jar
+                 jarfile="${build-dir}/proxool-${release}.jar"
+                 basedir="${build-dir}/classes"
+                 manifest="${build-dir}/etc/MANIFEST.MF">
+-            <zipfileset src="jarjar/cglib-nodep-2.1_3.jar"/>
+-            <rule pattern="net.sf.cglib.**" result="org.logicalcobwebs.cglib.@1"/>
+-            <zap pattern="net.sf.cglib.transform.**"/>
+-            <zap pattern="net.sf.cglib.beans.**"/>
+-            <zap pattern="net.sf.cglib.util.**"/>
+-        </jarjar>
++        </jar>
+     </target>
+ 
+     <target
+@@ -295,12 +288,7 @@
+     </target>
+ 
+     <target name="repackage-dependencies" description="Repackage the Cglib project into Proxool">
+-        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="jarjar/jarjar-0.6.jar"/>
+         <mkdir dir="build/lib"/>
+-        <jarjar verbose="false" jarfile="build/lib/proxool-cglib.jar">
+-            <zipfileset src="jarjar/cglib-nodep-2.1_3.jar"/>
+-            <rule pattern="net.sf.cglib.**" result="org.logicalcobwebs.cglib.@1"/>
+-        </jarjar>
+     </target>
+ 
+     <target
+Only in proxool-0.9.1: jarjar
+Only in proxool-0.9.1: lib
+diff -ur proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxoolDataSource.java proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxoolDataSource.java
+--- proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxoolDataSource.java	2007-12-14 18:03:28.000000000 -0500
++++ proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxoolDataSource.java	2011-08-26 08:58:31.343000286 -0400
+@@ -17,8 +17,10 @@
+ import javax.sql.DataSource;
+ import java.sql.Connection;
+ import java.sql.SQLException;
++import java.sql.SQLFeatureNotSupportedException;
+ import java.util.Hashtable;
+ import java.util.Enumeration;
++import java.util.logging.Logger;
+ import java.util.Properties;
+ import java.util.StringTokenizer;
+ import java.io.PrintWriter;
+@@ -684,6 +686,17 @@
+         throw new UnsupportedOperationException("You should configure the username and password "
+                 + "within the proxool configuration and just call getConnection() instead.");
+     }
++
++    /* JDK 1.7 */
++    public boolean isWrapperFor(Class<?> iface) throws SQLException{
++        throw new SQLException("Not supported operation");
++    }
++    public <T> T unwrap(Class<T> iface) throws SQLException{
++        throw new SQLException("Not supported operation");
++    }
++    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
++        throw new SQLFeatureNotSupportedException("Not supported operation");
++    }
+ }
+ 
+ /*
+@@ -722,4 +735,4 @@
+  Revision 1.1  2004/03/15 23:54:25  chr32
+  Initail Proxool J2EE-managed DataSource. Not quite complete yet.
+ 
+- */
+\ No newline at end of file
++ */
+diff -ur proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxoolDriver.java proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxoolDriver.java
+--- proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxoolDriver.java	2007-12-14 08:34:13.000000000 -0500
++++ proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxoolDriver.java	2011-08-26 08:57:59.546000109 -0400
+@@ -14,6 +14,8 @@
+ import java.sql.DriverManager;
+ import java.sql.DriverPropertyInfo;
+ import java.sql.SQLException;
++import java.sql.SQLFeatureNotSupportedException;
++import java.util.logging.Logger;
+ import java.util.Properties;
+ import java.util.ResourceBundle;
+ 
+@@ -221,6 +223,11 @@
+         return true;
+     }
+ 
++    /* JDK 1.7 */
++    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
++        throw new SQLFeatureNotSupportedException("Not supported operation");
++    }
++
+ }
+ 
+ /*
+diff -ur proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxyDatabaseMetaData.java proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxyDatabaseMetaData.java
+--- proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxyDatabaseMetaData.java	2007-12-14 08:34:12.000000000 -0500
++++ proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxyDatabaseMetaData.java	2011-08-26 08:30:04.274000384 -0400
+@@ -8,8 +8,8 @@
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+ 
+-import org.logicalcobwebs.cglib.proxy.MethodInterceptor;
+-import org.logicalcobwebs.cglib.proxy.MethodProxy;
++import net.sf.cglib.proxy.MethodInterceptor;
++import net.sf.cglib.proxy.MethodProxy;
+ 
+ import java.lang.reflect.InvocationTargetException;
+ import java.lang.reflect.Method;
+diff -ur proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxyFactory.java proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxyFactory.java
+--- proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxyFactory.java	2007-12-14 08:34:13.000000000 -0500
++++ proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxyFactory.java	2011-08-26 08:30:03.807000384 -0400
+@@ -5,11 +5,11 @@
+  */
+ package org.logicalcobwebs.proxool;
+ 
+-import org.logicalcobwebs.cglib.proxy.Enhancer;
+-import org.logicalcobwebs.cglib.proxy.Factory;
+-import org.logicalcobwebs.cglib.proxy.Callback;
+-import org.logicalcobwebs.cglib.core.NamingPolicy;
+-import org.logicalcobwebs.cglib.core.Predicate;
++import net.sf.cglib.proxy.Enhancer;
++import net.sf.cglib.proxy.Factory;
++import net.sf.cglib.proxy.Callback;
++import net.sf.cglib.core.NamingPolicy;
++import net.sf.cglib.core.Predicate;
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+ 
+diff -ur proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxyStatement.java proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxyStatement.java
+--- proxool-0.9.1/src/java/org/logicalcobwebs/proxool/ProxyStatement.java	2007-12-14 08:34:13.000000000 -0500
++++ proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/ProxyStatement.java	2011-08-26 08:30:04.320000384 -0400
+@@ -8,9 +8,9 @@
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+ 
+-import org.logicalcobwebs.cglib.proxy.MethodInterceptor;
+-import org.logicalcobwebs.cglib.proxy.MethodProxy;
+-import org.logicalcobwebs.cglib.proxy.InvocationHandler;
++import net.sf.cglib.proxy.MethodInterceptor;
++import net.sf.cglib.proxy.MethodProxy;
++import net.sf.cglib.proxy.InvocationHandler;
+ import org.logicalcobwebs.proxool.proxy.InvokerFacade;
+ 
+ import java.lang.reflect.InvocationTargetException;
+diff -ur proxool-0.9.1/src/java/org/logicalcobwebs/proxool/WrappedConnection.java proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/WrappedConnection.java
+--- proxool-0.9.1/src/java/org/logicalcobwebs/proxool/WrappedConnection.java	2007-12-14 08:34:13.000000000 -0500
++++ proxool-0.9.1.new/src/java/org/logicalcobwebs/proxool/WrappedConnection.java	2011-08-26 08:30:04.088000384 -0400
+@@ -5,9 +5,9 @@
+  */
+ package org.logicalcobwebs.proxool;
+ 
+-import org.logicalcobwebs.cglib.proxy.InvocationHandler;
+-import org.logicalcobwebs.cglib.proxy.MethodInterceptor;
+-import org.logicalcobwebs.cglib.proxy.MethodProxy;
++import net.sf.cglib.proxy.InvocationHandler;
++import net.sf.cglib.proxy.MethodInterceptor;
++import net.sf.cglib.proxy.MethodProxy;
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+ import org.logicalcobwebs.proxool.proxy.InvokerFacade;
+@@ -81,7 +81,7 @@
+ 
+     /**
+      * Delegates to {@link #invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[]) invoke}
+-     * @see MethodInterceptor#intercept(java.lang.Object, java.lang.reflect.Method, java.lang.Object[], org.logicalcobwebs.cglib.proxy.MethodProxy)
++     * @see MethodInterceptor#intercept(java.lang.Object, java.lang.reflect.Method, java.lang.Object[], net.sf.cglib.proxy.MethodProxy)
+      */
+     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+         return invoke(proxy, method, args);
+diff -ur proxool-0.9.1/src/java-test/org/logicalcobwebs/cglib/EnhancerTest.java proxool-0.9.1.new/src/java-test/org/logicalcobwebs/cglib/EnhancerTest.java
+--- proxool-0.9.1/src/java-test/org/logicalcobwebs/cglib/EnhancerTest.java	2007-12-14 08:34:17.000000000 -0500
++++ proxool-0.9.1.new/src/java-test/org/logicalcobwebs/cglib/EnhancerTest.java	2011-08-26 08:30:03.425000384 -0400
+@@ -3,10 +3,10 @@
+  * See org.logicalcobwebs.proxool.package.html for details.
+  * The latest version is available at http://proxool.sourceforge.net
+  */
+-package org.logicalcobwebs.cglib;
++package net.sf.cglib;
+ 
+ import org.logicalcobwebs.proxool.AbstractProxoolTest;
+-import org.logicalcobwebs.cglib.proxy.Enhancer;
++import net.sf.cglib.proxy.Enhancer;
+ 
+ /**
+  * A test test class (!) to help me understand the Enhancer. It fails. Or at least,
+diff -ur proxool-0.9.1/src/java-test/org/logicalcobwebs/cglib/MyConcreteClass.java proxool-0.9.1.new/src/java-test/org/logicalcobwebs/cglib/MyConcreteClass.java
+--- proxool-0.9.1/src/java-test/org/logicalcobwebs/cglib/MyConcreteClass.java	2007-12-14 08:34:17.000000000 -0500
++++ proxool-0.9.1.new/src/java-test/org/logicalcobwebs/cglib/MyConcreteClass.java	2011-08-26 08:30:03.402000384 -0400
+@@ -3,7 +3,7 @@
+  * See org.logicalcobwebs.proxool.package.html for details.
+  * The latest version is available at http://proxool.sourceforge.net
+  */
+-package org.logicalcobwebs.cglib;
++package net.sf.cglib;
+ 
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+diff -ur proxool-0.9.1/src/java-test/org/logicalcobwebs/cglib/MyInterfaceIF.java proxool-0.9.1.new/src/java-test/org/logicalcobwebs/cglib/MyInterfaceIF.java
+--- proxool-0.9.1/src/java-test/org/logicalcobwebs/cglib/MyInterfaceIF.java	2007-12-14 08:34:17.000000000 -0500
++++ proxool-0.9.1.new/src/java-test/org/logicalcobwebs/cglib/MyInterfaceIF.java	2011-08-26 08:30:03.391000384 -0400
+@@ -3,7 +3,7 @@
+  * See org.logicalcobwebs.proxool.package.html for details.
+  * The latest version is available at http://proxool.sourceforge.net
+  */
+-package org.logicalcobwebs.cglib;
++package net.sf.cglib;
+ 
+ /**
+  * See {@link EnhancerTest}
+diff -ur proxool-0.9.1/src/java-test/org/logicalcobwebs/cglib/MyProxy.java proxool-0.9.1.new/src/java-test/org/logicalcobwebs/cglib/MyProxy.java
+--- proxool-0.9.1/src/java-test/org/logicalcobwebs/cglib/MyProxy.java	2007-12-14 08:34:17.000000000 -0500
++++ proxool-0.9.1.new/src/java-test/org/logicalcobwebs/cglib/MyProxy.java	2011-08-26 08:30:03.414000384 -0400
+@@ -3,11 +3,11 @@
+  * See org.logicalcobwebs.proxool.package.html for details.
+  * The latest version is available at http://proxool.sourceforge.net
+  */
+-package org.logicalcobwebs.cglib;
++package net.sf.cglib;
+ 
+ 
+-import org.logicalcobwebs.cglib.proxy.MethodInterceptor;
+-import org.logicalcobwebs.cglib.proxy.MethodProxy;
++import net.sf.cglib.proxy.MethodInterceptor;
++import net.sf.cglib.proxy.MethodProxy;
+ 
+ import java.lang.reflect.Method;
+ 
