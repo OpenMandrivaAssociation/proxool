@@ -1,4 +1,4 @@
-%_javapackages_macros
+%{?_javapackages_macros:%_javapackages_macros}
 %define git_commit 659fc71
 
 Summary:       Java connection pool library
@@ -87,3 +87,42 @@ install -m 0644 %{S:1} $RPM_BUILD_ROOT/%{_mavenpomdir}/JPP-%{name}.pom
 %files javadoc
 %doc LICENCE.txt
 %doc %{_javadocdir}/%{name}
+
+%changelog
+* Sat Aug 17 2013 gil cattaneo <puntogil@libero.it> 0:0.9.1-11
+- fix rhbz#992827
+- fix BR list
+- removed rpmlint problems
+- minor changes to adapt to current guideline
+
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:0.9.1-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:0.9.1-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:0.9.1-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Wed Mar 14 2012 Andy Grimm <agrimm@gmail.com> - 0:0.9.1-7
+- Fix cglib groupId in POM to match Fedora's cglib
+
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:0.9.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Tue Dec 13 2011 Andy Grimm <agrimm@gmail.com> - 0:0.9.1-5
+- Remove executable permissions introduced in git repository
+
+* Mon Dec 12 2011 Andy Grimm <agrimm@gmail.com> - 0:0.9.1-4
+- Fix license, use git upstream source, and fix
+  Requires for javadoc subpackage.
+
+* Thu Oct 20 2011 Andy Grimm <agrimm@gmail.com> - 0:0.9.1-3
+- add POM file
+
+* Wed Oct 19 2011 Andy Grimm <agrimm@gmail.com> - 0:0.9.1-2
+- spec file clean-up
+
+* Fri Aug 26 2011 Andy Grimm <agrimm@gmail.com> - 0:0.9.1-1
+- initial build
+
