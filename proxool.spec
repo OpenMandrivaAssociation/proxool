@@ -4,7 +4,7 @@
 Summary:       Java connection pool library
 Name:          proxool
 Version:       0.9.1
-Release:       11.0%{?dist}
+Release:       13.0
 Epoch:         0
 License:       ASL 2.0
 URL:           http://proxool.sourceforge.net/
