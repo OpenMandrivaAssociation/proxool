@@ -27,7 +27,7 @@ BuildRequires: dom4j
 BuildRequires: avalon-framework
 BuildRequires: hsqldb1
 BuildRequires: junit
-BuildRequires: log4j
+BuildRequires: log4j12
 BuildRequires: tomcat-servlet-3.0-api
 BuildRequires: checkstyle
 
@@ -76,13 +76,10 @@ cp -pr build/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 # pom
 install -d -m 0755 $RPM_BUILD_ROOT%{_mavenpomdir}
 install -m 0644 %{S:1} $RPM_BUILD_ROOT/%{_mavenpomdir}/JPP-%{name}.pom
-%add_maven_depmap JPP-%{name}.pom %{name}.jar
+%add_maven_depmap
 
-%files
+%files -f .mfiles
 %doc *.txt
-%{_javadir}/%{name}.jar
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavendepmapfragdir}/%{name}
 
 %files javadoc
 %doc LICENCE.txt
