@@ -7,7 +7,7 @@ Version:       0.9.1
 Release:       13.2
 Epoch:         0
 License:       ASL 2.0
-URL:           http://proxool.sourceforge.net/
+URL:           https://proxool.sourceforge.net/
 # Grabbing a newer version from git due to license change
 # https://github.com/proxool/proxool/tarball/master
 # (commit 659fc71e617151327779802a5171f0da8205918d)
